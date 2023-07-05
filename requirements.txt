@@ -1,0 +1,9 @@
+Flask
+gunicorn
+h5py
+Jinja2
+Keras
+numpy
+tensorflow
+sastrawi
+string
