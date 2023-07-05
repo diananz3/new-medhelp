@@ -20,14 +20,41 @@
         <div class="header"> 
             <h6>MedHelp</h6> 
         </div>
-        <p>Selamat datang, MedHelp bot siap membantu memberikan informasi layanan Puskesmas Keputih</p>
+        <div class="container">
+            <div class="chat-window">
+                <form>
+                    <div id="chatbox" class="chats">
+                        <div class="msgBot">
+                            <p>Selamat datang {{session.username}}, MedHelp bot siap membantu memberikan informasi layanan Puskesmas Keputih</p>              
+                        </div>
+                        <!-- <button id="yes" class="choice">Ya</button><button id="no" class="choice">Tidak</button> -->
+                        <!-- <div class="msgUser">
+                            <p>Hello</p>
+                        </div>
+                        <div class="msgBot">
+                            <p>Halo, apakah ada yang bisa dibantu?</p>
+                        </div>
+                        <div class="msgUser">
+                            <p>Apakah bisa konsultasi dengan psikolog di Puskesmas Keputih?</p>
+                        </div>
+                        <div class="msgBot">
+                            <p>Puskesmas Keputih melayani konsultasi psikologi untuk mental health, konsultasi pra nikah, konsultasi ibu hamil dan pola asuh anak, konseling tumbuh kembang, dan konseling remaja.</p>
+                        </div> -->
+                    </div>
+                    <div id="userInput" class="user-input">
+                        <input id="text" type="text" placeholder="Ketikkan pesan....">
+                        <button class="submit" type="submit" id="send">KIRIM</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
 <script>
     $(document).ready(function() {
         $("form").on("submit", function(event) {
             var rawText = $("#text").val();
-            var userHtml = '<p class="userText"><span>' + rawText + "</span></p>";
+            var userHtml = '<div class="msgUser"><p>' + rawText + "</p></div>";
             $("#text").val("");
             $("#chatbox").append(userHtml);
             document.getElementById("userInput").scrollIntoView({
@@ -41,7 +68,7 @@
                 type: "POST",
                 url: "/get",
             }).done(function(data) {
-                var botHtml = '<p class="botText"><span>' + data + "</span></p>";
+                var botHtml = '<div class="msgBot"><p>' + data + '</p></div>';
                 $("#chatbox").append($.parseHTML(botHtml));
                 document.getElementById("userInput").scrollIntoView({
                     block: "start",

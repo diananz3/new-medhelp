@@ -97,7 +97,7 @@ def logout():
 def chatbot_response():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     text = request.form["msg"]
-    userid = session['userid']
+    # userid = session['userid']
     pred = predict_class(text)
     score = confidence(text)
 
@@ -128,8 +128,6 @@ def chatbot_response():
         return res
     else :
         if score >= 0.5:
-            cursor.execute('INSERT INTO chat VALUES (NULL, %s, %s, NULL)',(userid, id_pred))
-            mysql.connection.commit()
             if pred == "greeting" or pred == "closing":
                 res = getJawaban(pred)
             else:
