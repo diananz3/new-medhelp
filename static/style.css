@@ -144,14 +144,14 @@ button {
   max-width: 100%;
   width: max-content;
   margin-bottom: 15px;
-  border-radius: 10px 50px 50px 10px;
+  border-radius: 10px 10px 10px 10px;
 }
 
 .msgUser{
   margin-left: auto;
   color: white;
   background-color: #4070f4;
-  border-radius: 50px 10px 10px 50px;
+  border-radius: 10px 10px 10px 10px;
   padding: 5px 5px;
   width: max-content;
   max-width: 100%;

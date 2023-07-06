@@ -25,21 +25,8 @@
                 <form>
                     <div id="chatbox" class="chats">
                         <div class="msgBot">
-                            <p>Selamat datang {{session.username}}, MedHelp bot siap membantu memberikan informasi layanan Puskesmas Keputih</p>              
+                            <p>Selamat datang {{session.nama}}, MedHelp bot siap membantu memberikan informasi layanan Puskesmas Keputih</p>              
                         </div>
-                        <!-- <button id="yes" class="choice">Ya</button><button id="no" class="choice">Tidak</button> -->
-                        <!-- <div class="msgUser">
-                            <p>Hello</p>
-                        </div>
-                        <div class="msgBot">
-                            <p>Halo, apakah ada yang bisa dibantu?</p>
-                        </div>
-                        <div class="msgUser">
-                            <p>Apakah bisa konsultasi dengan psikolog di Puskesmas Keputih?</p>
-                        </div>
-                        <div class="msgBot">
-                            <p>Puskesmas Keputih melayani konsultasi psikologi untuk mental health, konsultasi pra nikah, konsultasi ibu hamil dan pola asuh anak, konseling tumbuh kembang, dan konseling remaja.</p>
-                        </div> -->
                     </div>
                     <div id="userInput" class="user-input">
                         <input id="text" type="text" placeholder="Ketikkan pesan....">
@@ -51,8 +38,14 @@
     </div>
 
 <script>
+    var idleMax = 3; // Logout after 3 minutes of IDLE
+    var idleTime = 0;
+
+    var idleInterval = setInterval("timerIncrement()", 60000);  // 1 minute interval    
+ 
     $(document).ready(function() {
         $("form").on("submit", function(event) {
+            idleTime = 0;
             var rawText = $("#text").val();
             var userHtml = '<div class="msgUser"><p>' + rawText + "</p></div>";
             $("#text").val("");
@@ -78,6 +71,14 @@
             event.preventDefault();
         });
     });
+
+            // count minutes
+    function timerIncrement() {
+        idleTime = idleTime + 1;
+        if (idleTime > idleMax) { 
+            window.location="/logout";
+        }
+    }
 </script>
 </body>
 

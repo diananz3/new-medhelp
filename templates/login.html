@@ -23,25 +23,16 @@
         <div class="text-center p-2"> 
             <span>Silakan isi form terlebih dahulu sebelum memulai chat!</span> 
         </div> 
-        <form>
+        <form method="POST">
             <div class="chat-form"> 
-                <input type="text" class="form-control" placeholder="Nama"> 
-                <input type="text" class="form-control" placeholder="NIK"> 
-                <button type="submit" class="submit btn btn-block">Submit</button> 
+                <input type="text" name="nik" id="nik" class="form-control" placeholder="NIK"> 
+                <input type="text" name="nama" id="nama" class="form-control" placeholder="Nama"> 
+                <button type="Submit" class="entry btn btn-block">Submit</button> 
             </div> 
         </form>
     </div>
 
 <script>
-    $(document).ready(function() {
-        $("form").on("submit", function(event) {
-            $.ajax({
-                type: "GET",
-                url: "/try",
-            });
-            event.preventDefault();
-        });
-    });
 </script>
 </body>
 

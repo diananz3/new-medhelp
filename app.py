@@ -17,9 +17,9 @@ import MySQLdb.cursors
 
 
 # chat initialization
-best_model = load_model("model_best_cv.hdf5")
+best_model = load_model("model_bilstm_best.hdf5")
 factory = StopWordRemoverFactory().get_stop_words()
-more_stopword = ["permisi","saya", "aku", "kamu", "kita", "kak", "min", "apa"]
+more_stopword = ["permisi","saya", "aku", "kamu", "kita", "kak", "min", "apa", 'kapan']
 
 data = factory + more_stopword
 
@@ -29,7 +29,7 @@ stop = StopWordRemover(dictionary)
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
-f = open('tokenizer_best_cv.pickle', 'rb')
+f = open('tokenizer_bi.pickle', 'rb')
 tokenizer = pickle.load(f)
 
 f = open('tags.pickle', 'rb')
@@ -49,55 +49,50 @@ app.config['MYSQL_DB'] = 'medhelp'
 mysql = MySQL(app)
 app.secret_key = 'medhelp'
 
-@app.route("/")
-def form():
-    return render_template("login.html")
-
-@app.route("/try")
+@app.route("/chat")
 def index():
     return render_template("index.html")
 
-@app.route("/login",methods=["GET", "POST"])
-def login():
-    if request.method == 'POST' and 'uname' in request.form and 'passw' in request.form:
-        username = request.form['uname']
-        password = request.form['passw']
+@app.route("/", methods=["GET", "POST"])
+def entry():
+    if request.method == 'POST' and 'nik' in request.form and 'nama' in request.form:
+        nik = request.form['nik']
+        nama = request.form['nama']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM user WHERE username = % s AND password = % s', (username, password, ))
+        cursor.execute('SELECT * FROM users WHERE nik = % s ', [nik])
         user = cursor.fetchone()
-        if user:
+
+        if user is None:
+            cursor.execute('INSERT INTO users VALUES (NULL, % s, % s)',(nik, nama))
+            mysql.connection.commit()
+            cursor.execute('SELECT * FROM users WHERE nik = % s ', [nik])
+            user = cursor.fetchone()
             session['loggedin'] = True
-            session['userid'] = user['userid']
-            session['username'] = user['username']
-            session['email'] = user['email']
+            session['userid'] = user['id_user']
+            session['nik'] = user['nik']
+            session['nama'] = user['nama']
+            return redirect(url_for("index"))
+        elif user:
+            session['loggedin'] = True
+            session['userid'] = user['id_user']
+            session['nik'] = user['nik']
+            session['nama'] = user['nama']
             return redirect(url_for("index"))
     return render_template('login.html')
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
-        userName = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('INSERT INTO user VALUES (NULL, % s, % s, % s)',(userName, email, password))
-        mysql.connection.commit()
-        return redirect(url_for("login"))
-    return render_template('register.html')
  
-
 @app.route("/logout")
 def logout():
     session.pop('loggedin', None)
     session.pop('userid', None)
-    session.pop('username', None)
-    return redirect(url_for('login'))
+    session.pop('nik', None)
+    session.pop('nama', None)
+    return redirect(url_for('entry'))
 
 @app.route("/get", methods=["POST"])
 def chatbot_response():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     text = request.form["msg"]
-    # userid = session['userid']
+    userid = session['userid']
     pred = predict_class(text)
     score = confidence(text)
 
@@ -128,6 +123,8 @@ def chatbot_response():
         return res
     else :
         if score >= 0.5:
+            cursor.execute('INSERT INTO chat VALUES (NULL, %s, %s, NULL)',(userid, id_pred))
+            mysql.connection.commit()
             if pred == "greeting" or pred == "closing":
                 res = getJawaban(pred)
             else:
