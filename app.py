@@ -131,7 +131,7 @@ def chatbot_response():
                 res = getJawaban(pred)+"<br><br>Apakah jawaban tersebut membantu?(Ya/Tidak)"
             return res
         else:
-            res = "Mohon maaf, bot tidak bisa memberikan informasi tentang hal tersebut. Apakah ada pertanyaan lain?"
+            res = "Mohon maaf, bot tidak bisa memberikan informasi tentang hal tersebut. Silakan bertanya informasi lain"
             return res
 
 # chat functionalities
