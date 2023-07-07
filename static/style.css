@@ -1,3 +1,10 @@
+.bg{
+  background-image: url("main.png");
+  background-repeat: no-repeat;
+  background-attachment: fixed;  
+  background-size: cover;
+  background-color: #eee
+}
 body {
   background-image: url("bgnew.png");
   background-repeat: no-repeat;
@@ -77,6 +84,43 @@ body {
   justify-content: space-between;
   align-items: center;
 }
+
+header{
+  background-color: #4070f4;
+  color: white;
+  padding: 7px 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+main{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	width: 80%;
+	overflow: visible;
+  border-radius: 10px;
+  margin-top: 50px;
+  z-index: -1
+}
+
 
 .chat-form {
   padding: 15px
