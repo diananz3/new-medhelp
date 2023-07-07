@@ -19,7 +19,7 @@ import MySQLdb.cursors
 # chat initialization
 best_model = load_model("model_bilstm_best.hdf5")
 factory = StopWordRemoverFactory().get_stop_words()
-more_stopword = ["permisi","saya", "aku", "kamu", "kita", "kak", "min", "apa", 'kapan']
+more_stopword = ["permisi","saya", "aku", "kamu", "kita", "kak", "min", "apa", 'kapan', 'bagaimana', 'kenapa']
 
 data = factory + more_stopword
 
@@ -55,27 +55,27 @@ def index():
 
 @app.route("/", methods=["GET", "POST"])
 def entry():
-    if request.method == 'POST' and 'nik' in request.form and 'nama' in request.form:
-        nik = request.form['nik']
+    if request.method == 'POST' and 'email' in request.form and 'nama' in request.form:
+        email = request.form['email']
         nama = request.form['nama']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM users WHERE nik = % s ', [nik])
+        cursor.execute('SELECT * FROM user WHERE email = % s ', [email])
         user = cursor.fetchone()
 
         if user is None:
-            cursor.execute('INSERT INTO users VALUES (NULL, % s, % s)',(nik, nama))
+            cursor.execute('INSERT INTO user VALUES (NULL, % s, % s)',(email, nama))
             mysql.connection.commit()
-            cursor.execute('SELECT * FROM users WHERE nik = % s ', [nik])
+            cursor.execute('SELECT * FROM user WHERE email = % s ', [email])
             user = cursor.fetchone()
             session['loggedin'] = True
             session['userid'] = user['id_user']
-            session['nik'] = user['nik']
+            session['email'] = user['email']
             session['nama'] = user['nama']
             return redirect(url_for("index"))
         elif user:
             session['loggedin'] = True
             session['userid'] = user['id_user']
-            session['nik'] = user['nik']
+            session['email'] = user['email']
             session['nama'] = user['nama']
             return redirect(url_for("index"))
     return render_template('login.html')
@@ -84,7 +84,7 @@ def entry():
 def logout():
     session.pop('loggedin', None)
     session.pop('userid', None)
-    session.pop('nik', None)
+    session.pop('email', None)
     session.pop('nama', None)
     return redirect(url_for('entry'))
 
@@ -101,25 +101,25 @@ def chatbot_response():
     id_pred = predict['idtag']
 
     if text in ('Ya', 'ya'):
-        res = "Terima kasih sudah menggunakan MedHelp Puskesmas Keputih. Apakah ada pertanyaan lain?"
+        res = "Terima kasih sudah menggunakan MedHelp Puskesmas Keputih. Apakah ada informasi lain yang Anda butuhkan?"
         return res
     elif text in ('Tidak', 'tidak'):
-        last = getLastchat(userid)
-        last2 = getLastchat2(userid)
-        idlabel = getlabel(last)
-        cursor.execute('SELECT * FROM tags WHERE idtag != %s AND idlabel = %s LIMIT 1', (last,idlabel))
-        resp = cursor.fetchone()
-        if resp is not None:
-            newpred = resp['namatag']
-            id_newpred = resp['idtag']
-            if id_newpred == last2:
-                res = "Mohon maaf bot belum bisa memberikan informasi yang Anda butuhkan. Silakan menghubungi Puskesmas Keputih pada nomor 082137498585 atau datang langsung ke puskesmas"
-            else :            
-                cursor.execute('INSERT INTO chat VALUES (NULL, %s, %s, NULL)',(userid, id_newpred))
-                mysql.connection.commit()
-                res = getJawaban(newpred)+"<br><br>Apakah jawaban tersebut membantu?(Ya/Tidak)"
-        else:
-            res = "Mohon maaf bot belum bisa memberikan informasi yang Anda butuhkan. Silakan menghubungi Puskesmas Keputih pada nomor 082137498585 atau datang langsung ke puskesmas"
+        # last = getLastchat(userid)
+        # last2 = getLastchat2(userid)
+        # idlabel = getlabel(last)
+        # cursor.execute('SELECT * FROM tags WHERE idtag != %s AND idlabel = %s LIMIT 1', (last,idlabel))
+        # resp = cursor.fetchone()
+        # if resp is not None:
+        #     newpred = resp['namatag']
+        #     id_newpred = resp['idtag']
+        #     if id_newpred == last2:
+        #         res = "Mohon maaf bot belum bisa memberikan informasi yang Anda butuhkan. Silakan menghubungi Puskesmas Keputih pada nomor 082137498585 atau datang langsung ke puskesmas"
+        #     else :            
+        #         cursor.execute('INSERT INTO chat VALUES (NULL, %s, %s, NULL)',(userid, id_newpred))
+        #         mysql.connection.commit()
+        #         res = getJawaban(newpred)+"<br><br>Apakah informasi tersebut menjawab?(Ya/Tidak)"
+        # else:
+        res = "Mohon maaf bot belum bisa memberikan informasi yang Anda butuhkan. Silakan bertanya kembali atau menghubungi Puskesmas Keputih pada nomor 082137498585 atau datang langsung ke puskesmas"
         return res
     else :
         if score >= 0.5:
@@ -128,10 +128,10 @@ def chatbot_response():
             if pred == "greeting" or pred == "closing":
                 res = getJawaban(pred)
             else:
-                res = getJawaban(pred)+"<br><br>Apakah jawaban tersebut membantu?(Ya/Tidak)"
+                res = getJawaban(pred)+"<br><br>Apakah informasi tersebut menjawab?(Ya/Tidak)"
             return res
         else:
-            res = "Mohon maaf, bot tidak bisa memberikan informasi tentang hal tersebut. Silakan bertanya informasi lain"
+            res = "Mohon maaf, bot tidak bisa memberikan informasi tentang hal tersebut. Silakan bertanya kembali atau menghubungi Puskesmas Keputih pada nomor 082137498585"
             return res
 
 # chat functionalities
@@ -151,7 +151,6 @@ def stopwords_remover(text) :
 def stem(text) :
     text = stemmer.stem(text)
     return text
-
 
 def preprocess(text) :
     text = remove_punct(text)
@@ -183,7 +182,7 @@ def confidence(text) :
 #     vec = text2vec(text)
 #     pred = best_model.predict(vec)
 #     list_class_prob = dict()
-#     for i in enumerate(pred[0]) :
+#     for i in enumerate(pred[0]\) :
 #         list_class_prob[tag[i[0]]] = i[1]
 #     return list_class_prob
 

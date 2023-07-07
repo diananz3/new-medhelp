@@ -71,7 +71,11 @@ body {
   background-color: #4070f4;
   border-radius: 5px 5px 0px 0px;
   margin-bottom: 10px;
-  color: #fff
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .chat-form {
