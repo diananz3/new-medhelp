@@ -55,27 +55,27 @@ def index():
 
 @app.route("/", methods=["GET", "POST"])
 def entry():
-    if request.method == 'POST' and 'email' in request.form and 'nama' in request.form:
-        email = request.form['email']
+    if request.method == 'POST' and 'date' in request.form and 'nama' in request.form:
+        date = request.form['date']
         nama = request.form['nama']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM user WHERE email = % s ', [email])
+        cursor.execute('SELECT * FROM users WHERE date = % s AND nama = % s', (date, nama))
         user = cursor.fetchone()
-
+        
         if user is None:
-            cursor.execute('INSERT INTO user VALUES (NULL, % s, % s)',(email, nama))
+            cursor.execute('INSERT INTO users VALUES (NULL, % s, % s)',(date, nama))
             mysql.connection.commit()
-            cursor.execute('SELECT * FROM user WHERE email = % s ', [email])
+            cursor.execute('SELECT * FROM users WHERE date = % s AND nama = % s', (date, nama))
             user = cursor.fetchone()
             session['loggedin'] = True
             session['userid'] = user['id_user']
-            session['email'] = user['email']
+            session['date'] = user['date']
             session['nama'] = user['nama']
             return redirect(url_for("index"))
         elif user:
             session['loggedin'] = True
             session['userid'] = user['id_user']
-            session['email'] = user['email']
+            session['date'] = user['date']
             session['nama'] = user['nama']
             return redirect(url_for("index"))
     return render_template('login.html')
@@ -84,7 +84,7 @@ def entry():
 def logout():
     session.pop('loggedin', None)
     session.pop('userid', None)
-    session.pop('email', None)
+    session.pop('date', None)
     session.pop('nama', None)
     return redirect(url_for('entry'))
 
